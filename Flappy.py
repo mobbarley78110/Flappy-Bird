@@ -7,7 +7,7 @@ from objects import Floor
 from settings import Settings
 import random
 from math import sin
-
+from os import path
 
 class Flappy:
 
@@ -33,11 +33,12 @@ class Flappy:
         self.can_score = True
         self.score_frame = 0
         self.speed = -self.s.speed
-        self.clouds = pygame.image.load('images/clouds.png')
+        self.clouds = pygame.image.load(path.join('images', 'clouds.png'))
         self.surf_death = pygame.Surface((self.s.w, self.s.h), pygame.SRCALPHA)
         self.surf_death.fill((50, 50, 50, 255))
-        self.score_board = pygame.image.load('images/score_board.png').convert_alpha()
-        self.restart = pygame.image.load('images/restart.png')
+        self.score_board = pygame.image.load(path.join('images', 'score_board.png')).convert_alpha()
+        self.restart = pygame.image.load(path.join('images', 'restart.png'))
+        self.tuto = pygame.image.load(path.join('images', 'tuto.png'))
 
     def run(self):
         while self.running:
@@ -57,6 +58,9 @@ class Flappy:
                 if event.key == pygame.K_SPACE:
                     if self.dead == False:
                         self.bird.jump()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.dead == False:
+                    self.bird.jump()
 
     def _update_screen(self):
         self.mainClock.tick(60)
@@ -75,9 +79,14 @@ class Flappy:
                 # draw bird
                 self.bird.y = 15 * sin(self.frame_counter/10) + (self.s.h - self.s.floor_h) / 2 - 15 / 2
                 self.bird.draw()
+                # draw tuto
+                self.screen.blit(self.tuto, (self.s.w // 2, self.s.h // 2))
                 # escape this loop if pressing SPACE
                 key_down = pygame.key.get_pressed()
                 if key_down[pygame.K_SPACE]:
+                    self.started = True
+                mouse_down = pygame.mouse.get_pressed()
+                if mouse_down == (1, 0, 0):
                     self.started = True
 
             # MAIN GAME LOOP
@@ -157,8 +166,9 @@ class Flappy:
             self.screen.blit(self.surf_death, (0, 0))
 
             key_down = pygame.key.get_pressed()
+            mouse_down = pygame.mouse.get_pressed()
             if self.frame_counter > self.death_frame + 30:
-                if key_down[pygame.K_SPACE]:
+                if key_down[pygame.K_SPACE] | (mouse_down == (1, 0, 0)):
                     self.__init__()
                     self.bird.dy = 0
 
